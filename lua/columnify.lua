@@ -27,7 +27,7 @@ function M:parse_header()
     table.insert(self.cols, name)
     local len = #name + #spaces
     local endidx = startidx + len
-    self.stats[name] = { name = name, pos = pos, start = startidx + 1, _end = endidx, len = len }
+    self.stats[name] = { name = name, pos = pos, start = startidx, _end = endidx, len = len }
     if (endidx == #self.header) then
       self.stats[name]._end = -1
     end
@@ -56,7 +56,25 @@ function M:get_col(line, col_name)
     print(("[Columnify] col '%s' not found"):format(col_name))
     return ""
   end
-  return vim.trim(line:sub(col_stat.start, col_stat._end))
+  local col_start = col_stat.start + 1 -- convert to base 1
+  local col_end = col_stat._end
+  return vim.trim(line:sub(col_start, col_end))
+end
+
+---@param row number base 0
+---@param col_name string
+---@param value string
+function M:set_col(row, col_name, value)
+  ---@type Columnify.Stats
+  local col_stat = self.stats[col_name]
+  if not col_stat then
+    print(("[Columnify] col '%s' not found"):format(col_name))
+    return ""
+  end
+  local bufnr = vim.api.nvim_get_current_buf()
+  local start_col = col_stat.start
+  local end_col = col_stat._end
+  vim.api.nvim_buf_set_text(bufnr, row, start_col, row, end_col, { value })
 end
 
 ---@return string

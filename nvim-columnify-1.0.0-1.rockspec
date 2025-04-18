@@ -26,3 +26,7 @@ build = {
     ["columnify"] = "lua/columnify/init.lua",
   }
 }
+
+test = {
+  type = "busted"
+}
